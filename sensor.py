@@ -1,19 +1,20 @@
 from machine import ADC
 from machine import Pin
 from time import sleep
+from hcsr04 import HCSR04
+from time import sleep
 import dht 
 
-
-
-adc = ADC(0)            
-sensor = dht.DHT11(Pin(0))
+usensor = HCSR04(trigger_pin=12, echo_pin=14,echo_timeout_us=10000)
+adc = ADC(32)            
+sensor = dht.DHT11(Pin(15))
 
 def mq_sensor():
     sleep(1)
     deger = adc.read()
     print("gaz değeri :",deger)
     sleep(1)
-    
+   
     
     
 def dht_sensor():
@@ -27,5 +28,10 @@ def dht_sensor():
     except OSError as e:
         print('sensör okunmadı')
     
- 
-
+def hcr_sensor():
+    try :
+        mesafe = usensor.distance_cm()
+        print(mesafe,"\n")
+        sleep(2)
+    except KeyboardInterrupt:
+        pass 
