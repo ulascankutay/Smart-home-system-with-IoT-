@@ -1,6 +1,6 @@
 from simple import MQTTClient
+import urequests as requests
 import time
-
 import network
 import machine
 import sensor
@@ -57,6 +57,13 @@ try:
     client = ConnectAndSubscribe()
 except OSError as e:
     RestartAndConnect()
+cnt = 0
 while True :
-    publish(topic_sub,)
+    temp = 25 #sensor.temperature()
+    hum = 60 #sensor.humidity()
+    cnt = cnt + 1
+    dht_readings = {'field1':temp,'field2':hum,'field3':cnt}
+    #request = requests.post('https://api.thingspeak.com/update?api_key=ZT0I1PTFIIIBB0GE',json=dht_readings, headers = {'Content-Type': 'application/json'})
+    #request.close()
+    
     time.sleep(1)
