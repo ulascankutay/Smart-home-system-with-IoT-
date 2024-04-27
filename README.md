@@ -97,6 +97,6 @@ def mq_sensor():
   
 ## Lisans
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](https://github.com/ulascankutay/Smart-home-system-with-IoT-/blob/main/MIT.txt)
 
   
