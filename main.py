@@ -30,7 +30,7 @@ def subscribe_callback(topic,message):
 
 def ConnectAndSubscribe():
     sslparams = {'server_hostname': secrets["broker"]}
-    client = MQTTClient(client_id="esp32",
+    client = MQTTClient(client_id="esp32-R1",
                     server=secrets["broker"],
                     port=secrets["port"],
                     user=secrets["mqtt_username"],
@@ -65,7 +65,7 @@ cnt = 0
 while True :
     temp = 25 #sensor.temperature()
     hum = 60 #sensor.humidity()
-    cnt = cnt + 1
+    cnt = cnt + 20
     dht_readings = {'field1':temp,'field2':hum,'field3':cnt}
     #request = requests.post('https://api.thingspeak.com/update?api_key=ZT0I1PTFIIIBB0GE',json=dht_readings, headers = {'Content-Type': 'application/json'})
     #request.close()
