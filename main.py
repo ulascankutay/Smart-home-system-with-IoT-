@@ -4,7 +4,11 @@ import time
 import network
 import machine
 import sensor
+from machine import Pin
 
+
+p0 = Pin(2, Pin.OUT)
+         
 secrets = {
    'mqtt_username' : 'ulascan',
    'mqtt_key' : '135790.Uk',
@@ -12,25 +16,21 @@ secrets = {
    'port' : 8883
 }
 
-topic_sub=b"Fan"
-
-"""
-branch 
-"""
-
 
 def subscribe_callback(topic,message):
-    print((topic,message))
-    if message == b'LED1 ON':
-        LED.on()
-        print('Led On yapıldı')
-    if message == b'LED1 OFF':
-        LED.off()
-        print('Led Off yapıldı')
+    
+    print(topic,message)
+    
+    message_str = message.decode('utf-8')
+    
+    if topic==b"home/led" and message_str=="1":
+        p0.on()
+    elif topic==b"home/led" and message_str=="0":
+        p0.off()
 
 def ConnectAndSubscribe():
     sslparams = {'server_hostname': secrets["broker"]}
-    client = MQTTClient(client_id="esp32-R1",
+    client = MQTTClient(client_id="esp32",
                     server=secrets["broker"],
                     port=secrets["port"],
                     user=secrets["mqtt_username"],
@@ -40,8 +40,18 @@ def ConnectAndSubscribe():
                     ssl_params=sslparams) 
     client.set_callback(subscribe_callback)
     client.connect()
-    client.subscribe(topic_sub)
-    #print('connected to',mqtt_server, 'MQTT Broker', 'subscribed to',topic_sub,'topic')
+    client.subscribe(b"home/siren")
+    client.subscribe(b"home/led")
+    client.subscribe(b"home/sıcaklık")
+    client.subscribe(b"home/mq2")
+    client.subscribe(b"home/role")
+    client.subscribe(b"home/ldr")
+    client.subscribe(b"home/fan")
+    client.subscribe(b"home/kapı")
+    client.subscribe(b"home/pencere")
+    client.subscribe(b"home/hareket")
+    client.subscribe(b"bahce/yagmur")
+    client.subscribe(b"bahce/supom")
     return client
 
 
@@ -57,17 +67,23 @@ def RestartAndConnect():
     machine.reset()
 
 
+
 try:
     client = ConnectAndSubscribe()
 except OSError as e:
     RestartAndConnect()
 cnt = 0
 while True :
-    temp = 25 #sensor.temperature()
-    hum = 60 #sensor.humidity()
-    cnt = cnt + 20
-    dht_readings = {'field1':temp,'field2':hum,'field3':cnt}
-    #request = requests.post('https://api.thingspeak.com/update?api_key=ZT0I1PTFIIIBB0GE',json=dht_readings, headers = {'Content-Type': 'application/json'})
-    #request.close()
+        temp = 25 #sensor.temperature()
+        hum = 70 #sensor.humidity()
+        cnt = cnt + 30
+        client.wait_msg()
+        time.sleep(0.2)
+       
+        dht_readings = {'field1':temp,'field2':hum,'field3':cnt}
+        request = requests.post('https://api.thingspeak.com/update?api_key=ZT0I1PTFIIIBB0GE',json=dht_readings, headers = {'Content-Type': 'application/json'})
+        request.close()
+        time.sleep(0.2)
+
     
-    time.sleep(1)
+    
