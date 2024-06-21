@@ -3,11 +3,9 @@ from time import sleep
 from robust import MQTTClient
 import dht
 import network
-import gc
-import sys
 import umail
 import ntptime
-import time
+
 
 
 adc = ADC(0)
@@ -15,6 +13,7 @@ sensor = dht.DHT11(Pin(16))
 buzzer= Pin(13, Pin.OUT)
 relay1 = Pin(5, Pin.OUT)
 relay2 = Pin(4, Pin.OUT)
+yagmurSen = Pin(10, Pin.IN,)
 
 relay1.value(1)
 relay2.value(1)
@@ -26,9 +25,9 @@ config =      {'host'       : 'smtp.gmail.com',
                'password'   : 'jliz lhzw fijq yvgn',
                'from_name'  : 'ESP8266',
                'to_name'    : 'Ulas Can',
-               'to'         : 'emine.lalegns@gmail.com',
-               'subject'    : 'Düşük Nem Oranı !!!',
-               'text'       : 'Nem oranı %10 altında,Sulama işlemi başlatıldı'}
+               'to'         : 'ulascankutay@gmail.com',
+               'subject'    : '',
+               'text'       : ''}
 
 #=======================================================
 THINGSPEAK_MQTT_CLIENT_ID = b"PSwCHCQEFSUhNBs6LB4OIBo"
@@ -102,33 +101,32 @@ def water_pump():
         sleep(1)
     return relay1.value()
 
-def clock_set():
-    ntptime.settime()
-    saat = time.localtime()
-    localclk=str(saat[3]+3)+"0"+str(saat[4])
-    return int(localclk)
-    
-PUBLISH_PERIOD_IN_SEC = 15
+PUBLISH_PERIOD_IN_SEC = 5
 while True:
-   # sıcaklık, nem = dht_sensor()
+    sıcaklık, nem = dht_sensor()
     sleep(0.1)
-    #deger, yüzde = toprak_sensor()
+    deger, yüzde = toprak_sensor()
     sleep(0.1)
-    send_mail(config) 
+    yagmurDurum=yagmurSen.value()
+    if yagmurDurum == 0:
+        config['text'] ="Yağmur başladı  "
+        config['subject']="Yağış Uyarısı "
+        send_mail(config)      
     if yüzde<10:
-        send_mail(config)   
-    durum = water_pump()
+        config['text'] ="Nem oranı düşük %10"
+        config['subject']="Nem Oranı "
+        send_mail(config)    
     sleep(0.1)
-    saat=clock_set()
-
-    
     try:
         freeHeapInBytes = gc.mem_free()
         credentials = bytes("channels/{:s}/publish".format(THINGSPEAK_CHANNEL_ID), 'utf-8')  
-        payload = bytes("field1={:.1f}&field2={:.1f}&field3={:.1f}&field4={:.1f}&field5={:.1f}\n".format(sıcaklık, nem, yüzde,durum,saat), 'utf-8')
+        payload = bytes("field1={:.1f}&field2={:.1f}&field3={:.1f}&field4={:.1f}\n".format(sıcaklık, nem, yüzde,yagmurDurum), 'utf-8')
         client.publish(credentials, payload)
         sleep(PUBLISH_PERIOD_IN_SEC)
     except KeyboardInterrupt:
         print('Ctrl-C pressed...exiting')
         client.disconnect()
         break
+
+
+
