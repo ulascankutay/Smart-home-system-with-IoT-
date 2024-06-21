@@ -1,13 +1,16 @@
 from simple import MQTTClient
 import urequests as requests
-import time
+from machine import Pin
+from time import sleep
 import network
 import machine
 import sensor
-from machine import Pin
 
 
-p0 = Pin(2, Pin.OUT)
+
+
+
+LED1 = Pin(3, Pin.OUT)
          
 secrets = {
    'mqtt_username' : 'ulascan',
@@ -25,10 +28,10 @@ def subscribe_callback(topic,message):
     
     if topic == b"home/led":
         if message_str == "1":
-            # LED açık
+            LED1.on()
             print("LED açık")
         elif message_str == "0":
-            # LED kapalı
+            LED1.off()
             print("LED kapalı")
     elif topic == b"home/temperature":
         if message_str == "1":
@@ -36,7 +39,7 @@ def subscribe_callback(topic,message):
             print("Geçerli sıcaklık verisi")
         elif message_str == "0":
             # Geçersiz sıcaklık verisi
-            print("Geçersiz sıcaklık verisi")
+            print("Geçersiz sıcaklık verisi") 
     elif topic == b"home/humidity":
         if message_str == "1":
             # Geçerli nem verisi
@@ -72,7 +75,7 @@ def subscribe_callback(topic,message):
         elif message_str == "0":
             # Bahçe su pompası kapalı
             print("Bahçe su pompası kapalı")
-    elif topic == b"home/kapı":
+    elif topic == b"home/kapi":
         if message_str == "open":
             # Ev kapısı açık
             print("Ev kapısı açık")
@@ -104,13 +107,13 @@ def ConnectAndSubscribe():
     client.set_callback(subscribe_callback)
     client.connect()
     client.subscribe(b"home/siren")
-    client.subscribe(b"home/led")
-    client.subscribe(b"home/sıcaklık")
+    client.subscribe(b"home/ldr")
+    client.subscribe(b"home/sicaklik")
     client.subscribe(b"home/mq2")
     client.subscribe(b"home/role")
     client.subscribe(b"home/ldr")
     client.subscribe(b"home/fan")
-    client.subscribe(b"home/kapı")
+    client.subscribe(b"home/kapi")
     client.subscribe(b"home/pencere")
     client.subscribe(b"home/hareket")
     client.subscribe(b"bahce/yagmur")
@@ -126,7 +129,7 @@ def publish(topic,value):
     
     
 def RestartAndConnect():
-    time.sleep(2)
+    sleep(2)
     machine.reset()
 
 
@@ -137,16 +140,16 @@ except OSError as e:
     RestartAndConnect()
 cnt = 0
 while True :
-        temp = 25 #sensor.temperature()
-        hum = 70 #sensor.humidity()
-        cnt = cnt + 30
+        #sensor.temperature()
+        #sensor.humidity()
+        
         client.wait_msg()
-        time.sleep(0.2)
+        sleep(0.2)
        
         dht_readings = {'field1':temp,'field2':hum,'field3':cnt}
         request = requests.post('https://api.thingspeak.com/update?api_key=ZT0I1PTFIIIBB0GE',json=dht_readings, headers = {'Content-Type': 'application/json'})
         request.close()
-        time.sleep(0.2)
+        sleep(0.2)
 
     
     
