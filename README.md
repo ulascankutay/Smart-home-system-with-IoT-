@@ -95,9 +95,9 @@ def mq_sensor():
 ![ER Diagram](https://github.com/ulascankutay/Smart-home-system-with-IoT-/blob/main/Belge/proje.png)
 
 
-## Ekran Görüntüleri
+## Tamamlanmıs Maket  
 
-![ER Diagram](https://github.com/ulascankutay/Smart-home-system-with-IoT-/blob/main/Belge/proje.png)
+![ER Diagram](https://github.com/ulascankutay/Smart-home-system-with-IoT-/blob/main/Belge/son.jpeg)
 
 
 ## Lisans
